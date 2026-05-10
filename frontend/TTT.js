@@ -1,54 +1,67 @@
 const cells = document.querySelectorAll('.cell');
-const wins = [
-  [0,1,2],[3,4,5],[6,7,8],
-  [0,3,6],[1,4,7],[2,5,8],
-  [0,4,8],[2,4,6]
-];
-
-let board = Array(9).fill('');
-let currentPlayer = 'X';
+ 
+let myPlayer = 0;
+let myTurn = false;
 let gameOver = false;
-
-function checkWinner() {
-  for (const [a, b, c] of wins) {
-    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-      return [a, b, c];
+ 
+const ws = new WebSocket("ws://127.0.0.1:6789");
+ 
+ws.onopen = () => {
+    console.log("Connected to bridge");
+};
+ 
+ws.onclose = () => {
+    alert("Disconnected from server");
+};
+ 
+ws.onmessage = (event) => {
+    const msg = event.data;
+ 
+    if (myPlayer === 0) {
+        if (msg.includes("Player 1")) myPlayer = 1;
+        else if (msg.includes("Player 2")) myPlayer = 2;
     }
-  }
-  return null;
-}
-
+ 
+    if (msg.includes("Enter number")) {
+        myTurn = true;
+    }
+ 
+    if (msg.includes("Waiting")) {
+        myTurn = false;
+    }
+ 
+    if (msg.includes("Invalid")) {
+        myTurn = true;
+        alert("That spot is taken, try again");
+    }
+ 
+    if (msg.includes("VICTORY")) {
+        gameOver = true;
+        myTurn = false;
+        alert(msg.trim());
+    }
+ 
+    if (msg.includes("draw")) {
+        gameOver = true;
+        myTurn = false;
+        alert("Game is a draw!");
+    }
+};
+ 
 cells.forEach((cell, index) => {
-  cell.textContent = '';
-
-  cell.addEventListener('click', () => {
-    if (gameOver || board[index]) return;
-
-    board[index] = currentPlayer;
-    cell.textContent = currentPlayer;
-    cell.disabled = true;
-
-    const winCombo = checkWinner();
-    if (winCombo) {
-      winCombo.forEach(i => cells[i].style.backgroundColor = 'gold');
-      alert(`Player ${currentPlayer} wins!`);
-      gameOver = true;
-    } else if (board.every(v => v)) {
-      alert("It's a draw!");
-      gameOver = true;
-    } else {
-      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-    }
-  });
+    cell.textContent = index + 1;
+    cell.addEventListener('click', () => {
+        if (gameOver || !myTurn || cell.disabled) return;
+ 
+        const pos = index + 1;
+        cell.textContent = myPlayer === 1 ? 'X' : 'O';
+        cell.disabled = true;
+        myTurn = false;
+ 
+        ws.send(pos + "\n");
+    });
 });
-
+ 
 document.getElementById('restart').addEventListener('click', () => {
-  board = Array(9).fill('');
-  currentPlayer = 'X';
-  gameOver = false;
-  cells.forEach(cell => {
-    cell.textContent = '';
-    cell.disabled = false;
-    cell.style.backgroundColor = '';
-  });
+    location.reload();
 });
