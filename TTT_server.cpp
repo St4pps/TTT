@@ -227,6 +227,10 @@ if(!validMove){
 
 moves++;
 turn++;
+char moveMsg[50];
+sprintf(moveMsg, "MOVE:%d:%d\n", choose, player);
+send(player1, moveMsg, strlen(moveMsg), 0);
+send(player2, moveMsg, strlen(moveMsg), 0);    
 
 
 if((//straight forward
