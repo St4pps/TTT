@@ -13,7 +13,7 @@ int main(){
     int server_fd;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
-
+//create socket
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) {
         perror("socket failed");
@@ -27,11 +27,12 @@ int main(){
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
 
+    //attaching ip/port
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("bind failed");
         exit(1);
     }
-
+        //f
     if (listen(server_fd, 2) < 0) {
         perror("listen failed");
         exit(1);
