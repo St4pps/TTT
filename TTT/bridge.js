@@ -8,7 +8,7 @@ const CPP_SERVER_PORT = 8080;
 const WS_PORT = 6789;
 
 //create WS server to connect to:
-const wss = new WebSocketServer({ port: WS_PORT });
+const wss = new WebSocketServer({ host: '0.0.0.0', port: WS_PORT });
 
 console.log(`Node.js bridge running on ws://127.0.0.1:${WS_PORT}`);
 
